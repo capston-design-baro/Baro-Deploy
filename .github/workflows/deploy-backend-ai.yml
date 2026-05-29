@@ -19,6 +19,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Get runner public IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Allow GitHub Actions runner SSH
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id "${{ secrets.EC2_SECURITY_GROUP_ID }}" \
+            --protocol tcp \
+            --port 22 \
+            --cidr "${{ steps.ip.outputs.ipv4 }}/32"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -36,3 +55,12 @@ jobs:
 
             docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f
+
+      - name: Revoke GitHub Actions runner SSH
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id "${{ secrets.EC2_SECURITY_GROUP_ID }}" \
+            --protocol tcp \
+            --port 22 \
+            --cidr "${{ steps.ip.outputs.ipv4 }}/32"
