@@ -51,7 +51,6 @@ jobs:
 
             git -C Baro-AI pull --ff-only
             git -C baro-backend pull --ff-only
-            git pull --ff-only
 
             docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f
