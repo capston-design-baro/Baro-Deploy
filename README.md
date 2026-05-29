@@ -3,6 +3,7 @@
 프론트엔드는 Vercel에 배포된 상태를 전제로 하고, EC2에서는 백엔드 API, Baro-AI, PostgreSQL만 Docker Compose로 실행한다.
 
 ## 구조
+<img width="1460" height="507" alt="Slide 16_9 - 1" src="https://github.com/user-attachments/assets/f010ee8a-1173-4d12-a56a-2e56e758b85b" />
 
 ```text
 사용자 브라우저
