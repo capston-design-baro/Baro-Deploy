@@ -1,6 +1,9 @@
 name: Deploy Backend and AI
 
 on:
+  repository_dispatch:
+    types:
+      - deploy-backend-ai
   push:
     branches:
       - main
