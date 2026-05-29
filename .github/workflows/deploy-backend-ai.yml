@@ -1,0 +1,38 @@
+name: Deploy Backend and AI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "docker-compose.prod.yml"
+      - ".github/workflows/deploy-backend-ai.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-ai
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            cd "${{ secrets.EC2_PROJECT_PATH }}"
+
+            git -C Baro-AI pull --ff-only
+            git -C baro-backend pull --ff-only
+            git pull --ff-only
+
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
